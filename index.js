@@ -180,10 +180,16 @@ function templateCache(filename, options) {
   var templateFooter = 'templateFooter' in options ? options.templateFooter : TEMPLATE_FOOTER;
 
   /**
+   * Custom option, do not combine
+   */
+
+  var doNotCombine = options.doNotCombine || false;
+
+  /**
    * Build templateCache
    */
 
-  return streamCombiner(
+  return !doNotCombine ? streamCombiner(
     templateCacheStream(options.root || '', options.base, options.templateBody, options.transformUrl, options.escapeOptions || {}),
     concat(filename),
     header(templateHeader, {
@@ -194,8 +200,17 @@ function templateCache(filename, options) {
       module: options.module || DEFAULT_MODULE
     }),
     wrapInModule(options.moduleSystem)
+  ): streamCombiner(
+    templateCacheStream(options.root || '', options.base, options.templateBody, options.transformUrl, options.escapeOptions || {}),
+    header(templateHeader, {
+      module: options.module || DEFAULT_MODULE,
+      standalone: options.standalone ? ', []' : ''
+    }),
+    footer(templateFooter, {
+      module: options.module || DEFAULT_MODULE
+    }),
+    wrapInModule(options.moduleSystem)
   );
-
 }
 
 
